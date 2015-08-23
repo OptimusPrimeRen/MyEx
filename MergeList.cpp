@@ -1,4 +1,6 @@
 #include <iostream>
+#include <climits>
+#include <queue>
 
 using namespace std;
 
@@ -15,6 +17,10 @@ public:
 
     bool empty(){
         return head == nullptr;
+    }
+
+    node* gain_head(){
+        return head;
     }
 
     void push_back(int value){
@@ -48,6 +54,14 @@ public:
 
 };
 
+class compare{
+public:
+    bool operator()(node* n1,node* n2) const {
+    if (!n1 || !n2) return !n1;
+    return n1->payload > n2->payload;
+    }
+};
+
 linkedList merge(linkedList a,linkedList b){
     linkedList result;
     while(!a.empty()||!b.empty()){
@@ -68,9 +82,51 @@ linkedList merge(linkedList a,linkedList b){
     return result;
 }
 
+linkedList mergeK(linkedList array[],int k){
+    linkedList result;
+    int min = INT_MAX;
+    do{
+        min = INT_MAX;
+        for(int i=0;i<=k-1;i++){
+            if(!array[i].empty()){
+                if(array[i].front() < min){
+                    min = array[i].front();
+                }
+            }
+        }
+        for(int i=0;i<=k-1;i++){
+            if(!array[i].empty()){
+                if(array[i].front() == min){
+                    array[i].pop_front();
+                    break;
+                }
+            }
+        }
+        if(min != INT_MAX) result.push_back(min);
+    }while(min != INT_MAX);
+
+    return result;
+}
+
+linkedList mergeKListUsePriorityQueues(linkedList array[],int k){
+    linkedList result;
+    priority_queue<node*,vector<node*>,compare> q;
+    for(int i=0;i<=k-1;i++){
+        q.push(array[i].gain_head());
+    }
+    while(q.size() > 0){
+        node* temp = q.top();
+        q.pop();
+        result.push_back(temp->payload);
+        if(temp->next != nullptr){
+            q.push(temp->next);
+        }
+    }
+    return result;
+}
 int main()
 {
-    linkedList a,b;
+    linkedList a,b,c;
 
     a.push_back(1);
     a.push_back(3);
@@ -84,12 +140,19 @@ int main()
     b.push_back(8);
     b.push_back(10);
 
-    a.output();
-    cout<<endl;
-    b.output();
-    cout<<endl;
+    c.push_back(3);
+    c.push_back(5);
+    c.push_back(9);
+    c.push_back(12);
+    c.push_back(19);
 
-    linkedList result = merge(a,b);
+    //合并2个已排好序的链表
+    //linkedList result = merge(a,b);
+    linkedList array[] = {a,b,c};
+    //合并K个已排好序的链表(O(nk))
+    //linkedList result = mergeK(array,3);
+    //合并K个已排好序的链表,使用优先队列(O(nlogk))
+    linkedList result = mergeKListUsePriorityQueues(array,3);
     result.output();
 
     return 0;
